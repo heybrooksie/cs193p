@@ -20,8 +20,8 @@
 - (Card *)cardAtIndex:(NSUInteger)index;
 
 @property (readonly,nonatomic) int score;
-@property (readonly,nonatomic) NSString *results;
-
-
-
+@property (readonly,nonatomic) int incrementalScore;
+@property (readonly,nonatomic) BOOL doCardsMatch;
+@property (readonly,nonatomic) NSArray *currentCard;
+@property (readonly,nonatomic) NSArray *cardsThatMayMatchCurrentCard;
 @end

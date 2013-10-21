@@ -14,6 +14,11 @@
 
 @implementation Card
 
+ -(NSString *)description
+{
+    return self.contents;
+}
+
 - (int)match:(NSArray *)otherCards
 {
     if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
