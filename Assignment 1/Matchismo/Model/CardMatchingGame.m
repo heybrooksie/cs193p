@@ -11,15 +11,15 @@
 
 @interface CardMatchingGame()
 
-@property (readwrite,nonatomic) int score;
-@property (readwrite,nonatomic) int incrementalScore;
+@property (readwrite,nonatomic) int score;          // total score
+@property (readwrite,nonatomic) int incrementalScore; // change in score when new card flipped up
 @property (readwrite,nonatomic) BOOL doCardsMatch;
 @property (strong, nonatomic) NSArray *currentCard; //of Card
 @property (strong, nonatomic) NSArray *cardsThatMayMatchCurrentCard; //of Card
 @property (strong,nonatomic) NSMutableArray *cards; //of Card
-@property (nonatomic) int matchBonus; // change based on # of cards in game
-@property (nonatomic) int mismatchPenalty; // change based on # of cards in game
-@property (nonatomic) int cardsInGame2;
+@property (nonatomic) int matchBonus;               // change based on # of cards in game
+@property (nonatomic) int mismatchPenalty;          // change based on # of cards in game
+@property (nonatomic) int NCardsMatchGame;          // e.g. 2 or 3
 @property (nonatomic) int flipCost;
 
 @end
@@ -27,89 +27,9 @@
 
 @implementation CardMatchingGame
 
-// beginning of syntheses
-
-
-- (NSMutableArray *)cards
-{
-    if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
-    if (!_cards) _cards = [[NSMutableArray alloc] init];
-    return _cards;
-}
-
-// beginning of syntheses
-
-- (int)cardsInGame2
-{
-    //if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
-    if (!_cardsInGame2) _cardsInGame2 = 0;
-    return _cardsInGame2;
-}
-
-- (int)matchBonus
-{
-    //if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
-    if (!_matchBonus) {
-        switch (self.cardsInGame2) {
-            case 2:
-                self.matchBonus = 4;
-                break;
-            case 3:
-                self.matchBonus = 4; // note score returns 8
-                break;
-            default:
-                self.matchBonus = 0;
-                break;
-        }
-    }
-    return _matchBonus;
-}
-
-- (int)mismatchPenalty
-{
-    //if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
-    if (!_mismatchPenalty) {
-        switch (self.cardsInGame2) {
-            case 2:
-                self.mismatchPenalty = 2;
-                break;
-            case 3:
-                self.mismatchPenalty = 3;
-                break;
-            default:
-                self.mismatchPenalty = 0;
-                break;
-        }
-    }
-    return _mismatchPenalty;
-}
-
-- (int)flipCost
-{
-    //if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
-    if (!_flipCost) _flipCost = 1;
-    return _flipCost;
-}
-
-- (int)match
-{
-    //if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
-    if (!_score) _score = 0;
-    return _score;
-}
-
-- (int)incrementalScore
-{
-    //if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
-    if (!_incrementalScore) _incrementalScore = 0;
-    return _incrementalScore;
-}
-
-// end of syntheses
-
-//designmated initializer
+//designated initializer
 - (id)initWithCardCount:(NSUInteger)count
-              usingDeck:(Deck *)deck;
+              usingDeck:(Deck *)deck initWithMatchesInGame:(int)matchNcards;
 {
     if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
     self = [super init];
@@ -123,10 +43,29 @@
                 break;
             }
         }
+        self.NCardsMatchGame = matchNcards;
+        if (self.NCardsMatchGame == 2) {        //set bonuses and penalties
+            self.matchBonus = 4;
+            self.mismatchPenalty = 2;
+        } else {
+            self.matchBonus = 4;
+            self.mismatchPenalty = 3;
+        }
+        self.flipCost = 1;
     }
     return self;
 }
-// end of initializers
+
+// beginning of syntheses
+
+- (NSMutableArray *)cards
+{
+    if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
+    if (!_cards) _cards = [[NSMutableArray alloc] init];
+    return _cards;
+}
+
+// end of syntheses
 
 - (Card *)cardAtIndex:(NSUInteger)index
 {
@@ -134,7 +73,7 @@
     return (index < [self.cards count]) ? self.cards[index] : nil;
 }
 
-- (void)flipCardAtIndex:(NSUInteger)index :(int)cardsInGame
+- (void)flipCardAtIndex:(NSUInteger)index 
 {
     /*SPECIFICATIONS / RULES
      - Flip up one card.
@@ -143,7 +82,6 @@
      - For all flip ups including matches - score includes flip cost.
      */
     if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
-    self.cardsInGame2 = cardsInGame;                    //set bonuses and penalties
     Card *card = [self cardAtIndex:index];
     self.doCardsMatch = NO;
     if (card && !card.isUnplayable) {
@@ -158,14 +96,14 @@
             // if here, all cards matched or there is a mismatch. If match, check if still more cards for user to flip up.
             if ([cardsToMatchCurrentCard count] >= 1) { // there is a card to match to current card
                 matchScore = [card match:cardsToMatchCurrentCard];
-                if (matchScore && ([cardsToMatchCurrentCard count] == (cardsInGame - 1))) { //match!
+                if (matchScore && ([cardsToMatchCurrentCard count] == (self.NCardsMatchGame - 1))) { //match!
                     card.unplayable = YES;
                     for (Card *otherCard in cardsToMatchCurrentCard) otherCard.unplayable = YES;
                     self.doCardsMatch = YES;
                     self.incrementalScore = matchScore*self.matchBonus;
                     self.score += self.incrementalScore;
-                } else { // either cards don't match or we have not finished.
-                    if (!matchScore) { // no matcch
+                } else {                    // either cards don't match or we have not finished.
+                    if (!matchScore) {      // no matcch
                         for (Card *otherCard in cardsToMatchCurrentCard) otherCard.faceUp = !otherCard.isFaceUp;
                         self.doCardsMatch = NO;
                         self.incrementalScore = -self.mismatchPenalty;

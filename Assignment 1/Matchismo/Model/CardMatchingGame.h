@@ -14,9 +14,9 @@
 
 //designated initializer
 - (id)initWithCardCount:(NSUInteger)count
-              usingDeck:(Deck *)deck;
+              usingDeck:(Deck *)deck initWithMatchesInGame:(int)matchNcards;
 
-- (void)flipCardAtIndex:(NSUInteger)index :(int)cardsInGame;
+- (void)flipCardAtIndex:(NSUInteger)index;
 - (Card *)cardAtIndex:(NSUInteger)index;
 
 @property (readonly,nonatomic) int score;
