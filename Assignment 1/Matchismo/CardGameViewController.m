@@ -10,13 +10,6 @@
 #import "PlayingCardDeck.h"
 #import "CardMatchingGame.h"
 #import "CONSTANTS.h"
-/* to do's
- 
- - use hint to better snych card image to edge
- - in PlayingCardGame, match 3 cards using an array not ||'s or &&'s. Or two inputs not one.
- - results in PlayingCardGame sends back results data (e.g. card values and status and score), not a string. The string is created in the controller, the philosophy that the controller handles all text.
- - generalize the two card match loop to handle a three card match, eliminating the 3 card match loop.
-*/
 
 @interface CardGameViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *resultsLabel;
@@ -31,7 +24,7 @@
 
 @implementation CardGameViewController
 
-- (void)viewDidLoad
+- (void)viewDidLoad // all outlets set before here, but geometry not set (do in viewWillAppear)
 {
     if (LOG_MESSAGES) NSLog(@"START %s", __PRETTY_FUNCTION__);
     UISegmentedControl *sC = self.segmentedControl;
